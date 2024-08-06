@@ -1,6 +1,6 @@
 const express=require('express')
 const httpServer=require('http')
-constSocketIO=require('socket.io')
+const SocketIO=require('socket.io')
 
 const app=express()
 
