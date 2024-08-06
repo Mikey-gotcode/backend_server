@@ -3,9 +3,9 @@ const httpServer=require('http')
 
 const app=express()
 
-httpServer.createServer(app)
+const Server=httpServer.createServer(app)
 
-httpServer.listen(5001,()=>console.log('server is live'))
+Server.listen(5001,()=>console.log('server is live'))
 
 
 app.use('/api',(_,res)=>{
