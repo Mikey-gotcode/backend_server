@@ -2,6 +2,15 @@ const express=require('express')
 const httpServer=require('http')
 const SocketIO=require('socket.io')
 const cors=require('cors')
+const vehicleRoutes=require('./routers/vehicleRoutes')
+const saccoRoutes=require('./routers/saccoRoutes')
+const commuterRoutes=require('./routers/commuterRoutes')
+const {getVehicleID}=require('./controllers/vehicleController')
+const {mongoURI}=require('./config/keys')
+const dotenv=require('dotenv')
+
+
+dotenv.config()
 
 const app=express()
 
@@ -10,6 +19,10 @@ app.use(cors({
     methods:'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials:true,
 }))
+
+app.use('/sacco',saccoRoutes)
+app.use('/vehicle',vehicleRoutes)
+app.use('/commuter',commuterRoutes)
 
 const Server=httpServer.createServer(app)
 
