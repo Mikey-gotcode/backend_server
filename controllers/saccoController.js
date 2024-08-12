@@ -5,6 +5,10 @@ require('dotenv').config();
 
 console.log("jwt secret:", process.env.JWT_SECRET);
 
+
+// The number of salt rounds
+const saltRounds = 10;
+
 exports.register = async (req, res) => {
     const { saccoName, saccoOwner, email, phoneNumber, username, password } = req.body;
     console.log('Received registration data:', req.body);
@@ -18,22 +22,21 @@ exports.register = async (req, res) => {
         }
 
         // Hash the password and create a new Sacco
-        bcrypt.hash(password, null, null, async (err, hashedPassword) => {
-            if (err) {
-                console.error('Error hashing password:', err);
-                return res.status(500).json({ error: err.message });
-            }
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-            const newSacco = new Sacco({ saccoName, saccoOwner, email, phoneNumber, username, password: hashedPassword });
-            try {
-                const savedSacco = await newSacco.save();
-                console.log("Saved Sacco:", savedSacco);
-                res.status(200).json(savedSacco);
-            } catch (error) {
-                console.error('Error saving Sacco:', error);
-                res.status(500).json({ error: error.message });
-            }
+        const newSacco = new Sacco({ 
+            saccoName, 
+            saccoOwner, 
+            email, 
+            phoneNumber, 
+            username, 
+            password: hashedPassword 
         });
+
+        const savedSacco = await newSacco.save();
+        console.log("Saved Sacco:", savedSacco);
+        res.status(200).json(savedSacco);
+
     } catch (error) {
         console.error('Unexpected error:', error);
         res.status(500).json({ error: error.message });
