@@ -1,8 +1,15 @@
 const express=require('express')
 const httpServer=require('http')
 const SocketIO=require('socket.io')
+const cors=require('cors')
 
 const app=express()
+
+app.use(cors({
+    origin:'https://ma3sacco.netlify.app',
+    methods:'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials:true,
+}))
 
 const Server=httpServer.createServer(app)
 
