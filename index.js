@@ -1,4 +1,5 @@
-const express=require('express')
+const express= require('express')
+const mongoose=require('mongoose')
 const httpServer=require('http')
 const SocketIO=require('socket.io')
 const cors=require('cors')
@@ -20,6 +21,26 @@ app.use(cors({
     methods:'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials:true,
 }))
+const io=SocketIO(httpServer,{
+    cors:{
+        origin:'https://ma3sacco.netlify.app',
+        methods:["GET", "POST"]
+    }
+})
+io.on('connection',(socket)=>{
+    console.log('New Client connected',socket.id)
+
+    socket.on('sendLocation',(data)=>{
+        const vehicleID=getVehicleID()
+        console.log('Location received from vehicle:',vehicleID,data)
+        //emit the socket data to all other devices other than the origin
+        socket.broadcast.emit('receiveLocation',{...data,vehicleID})
+    })
+
+    socket.on('disconnect',()=>{
+        console.log('client disconnected:',socket.id)
+    })
+})
 
 app.use('/sacco',saccoRoutes)
 app.use('/vehicle',vehicleRoutes)
@@ -27,7 +48,7 @@ app.use('/commuter',commuterRoutes)
 
 const Server=httpServer.createServer(app)
 
-Server.listen(5001,()=>console.log('server is live'))
+//Server.listen(5001,()=>console.log('server is live'))
 
 
 app.use('/api',(_,res)=>{
@@ -36,4 +57,13 @@ app.use('/api',(_,res)=>{
 })
 app.use('/api',(_,res)=>{
     res.json({message:'hello world',status:200})
+})
+
+mongoose.connect(mongoURI)
+.then(()=>{
+    Server.listen(5001,()=>console.log('server is live'))
+})
+.catch(error=>{
+    console.log('failef to connect to database:',error)
+    process.exit(1)
 })
