@@ -32,10 +32,16 @@ exports.register = async (req, res) => {
             username, 
             password: hashedPassword 
         });
-
         const savedSacco = await newSacco.save();
+
+        const token=jwt.sign({id:newSacco._id},secret,{expiresIn:"1h"})
+        if(!token){
+            console.log('failed to generate token')
+            return res.status(500).json({message:'failed to generate token'})
+        }
+        console.log("generated token",token)
         console.log("Saved Sacco:", savedSacco);
-        res.status(200).json(savedSacco);
+        res.status(200).json({token,savedSacco});
 
     } catch (error) {
         console.error('Unexpected error:', error);
@@ -57,30 +63,26 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: "Sacco not found" });
         }
 
-        bcrypt.compare(password, sacco.password, (err, isMatch) => {
-            if (err) {
-                console.error('Error comparing password:', err);
-                return res.status(500).json({ error: err.message });
-            }
-            if (!isMatch) {
-                console.log('Invalid credentials');
-                return res.status(400).json({ message: "Invalid credentials" });
-            }
+        const isMatch = await bcrypt.compare(password, sacco.password);
+        if (!isMatch) {
+            console.log('Invalid credentials');
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
 
-            const token = jwt.sign({ id: sacco._id }, secret, { expiresIn: "1h" });
-            if (!token) {
-                console.log('Failed to generate token');
-                return res.status(500).json({ message: "Failed to generate token" });
-            }
+        const token = jwt.sign({ id: sacco._id }, secret, { expiresIn: "1h" });
+        if (!token) {
+            console.log('Failed to generate token');
+            return res.status(500).json({ message: "Failed to generate token" });
+        }
 
-            console.log('Generated token:', token);
-            return res.status(200).json({ token, sacco });
-        });
+        console.log('Generated token:', token);
+        return res.status(200).json({ token, sacco });
     } catch (error) {
         console.error('Unexpected error:', error);
         res.status(500).json({ error: error.message });
     }
 };
+
 
 exports.searchVehicle = async (req, res) => {
     const { VehicleRegistration } = req.body;

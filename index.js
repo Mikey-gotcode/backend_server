@@ -43,6 +43,7 @@ io.on('connection', (socket) => {
     });
 });
 
+
 // Routes
 app.use('/sacco', saccoRoutes);
 app.use('/vehicle', vehicleRoutes);
