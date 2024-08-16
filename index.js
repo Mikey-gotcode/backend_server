@@ -15,9 +15,24 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+//allowed origins
+const allowedOrigins = [
+    "https://ma3driver.netlify.app",
+    "https://ma3sacco.netlify.app"
+]
+
 // CORS Middleware
 app.use(cors({
-    origin: 'https://ma3sacco.netlify.app',
+    origin:function(origin,callback){
+        //allow request from my respective modules
+        if(!origin)return callback(null,true)
+
+        if(allowedOrigins.indexOf(origin)===-1){
+            const msg='The CORS policy for this site doesnt allow access from the specified origin'
+            return callback(new Error(msg),false)
+        }
+        return callback(null,true)
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 }));
