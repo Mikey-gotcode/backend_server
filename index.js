@@ -37,7 +37,10 @@ app.use(cors({
     credentials: true,
 }));
 
-const io = SocketIO(httpServer, {
+//create HTTP server and attach Socket.io to it
+const Server = httpServer.createServer(app);
+
+const io = SocketIO(Server, {
     cors: {
         origin:function(origin,callback){
             if(!origin)return callback(null,true)
@@ -74,7 +77,7 @@ app.use('/sacco', saccoRoutes);
 app.use('/vehicle', vehicleRoutes);
 app.use('/commuter', commuterRoutes);
 
-const Server = httpServer.createServer(app);
+
 
 // Ensure unique routes
 app.get('/api', (_, res) => {
